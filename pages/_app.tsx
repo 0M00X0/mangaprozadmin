@@ -3,6 +3,7 @@ import { SessionProvider } from "next-auth/react"
 import { appWithTranslation } from 'next-i18next';
 import { useEffect } from 'react';
 import i18n, { changeLanguage } from '@/lib/i18n';
+import { Analytics } from '@vercel/analytics/react';
 
 type AppProps = {
   Component: React.ComponentType<{ changeLanguage: (lng: string) => void }>,
@@ -20,6 +21,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
       <Component {...pageProps} changeLanguage={changeLanguage} />
+      <Analytics />
     </SessionProvider>
   )
 }
