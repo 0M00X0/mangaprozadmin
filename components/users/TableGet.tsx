@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
 export default function UsersTableGet(){
@@ -9,11 +9,9 @@ export default function UsersTableGet(){
     const [orderBy, setOrderBy] = useState("id");
     const [orderDirection, setOrderDirection] = useState("asc");
   
-    useEffect(() => {
-      fetchusers();
-    }, [currentPage, rowsPerPage, orderBy, orderDirection]);
+
   
-    const fetchusers = async () => {
+    const fetchusers =useCallback(async () => {
       const skip = (currentPage - 1) * rowsPerPage;
       const take = rowsPerPage;
   
@@ -24,8 +22,13 @@ export default function UsersTableGet(){
   
       setusers(data);
       setTotalPages(totalPages);
-    };
+    }, [currentPage, rowsPerPage, orderBy, orderDirection]);
   
+    useEffect(() => {
+      fetchusers();
+    }, [fetchusers]);
+
+
     const handlePrevPage = () => {
       if (currentPage > 1) {
         setCurrentPage(currentPage - 1);

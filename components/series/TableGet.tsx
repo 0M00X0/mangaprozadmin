@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
  
 
@@ -9,21 +9,17 @@ export default function SeriesTableGet() {
   const [totalPages, setTotalPages] = useState(1);
   const [orderBy, setOrderBy] = useState("id");
   const [orderDirection, setOrderDirection] = useState("asc");
-
-  useEffect(() => {
-    fetchSeries();
-  }, [currentPage, rowsPerPage, orderBy, orderDirection]);
-
-  const fetchSeries = async () => {
+  
+  const fetchSeries = useCallback(async () => {
     const skip = (currentPage - 1) * rowsPerPage;
     const take = rowsPerPage;
-
+  
     const response = await fetch(
       `/api/series/get?page=${currentPage}&limit=${rowsPerPage}&sortBy=${orderBy}&orderDirection=${orderDirection}`
     );
     const { data, totalPages } = await response.json();
-
-    const updatedSeries: any = await Promise.all(
+  
+    const updatedSeries: any= await Promise.all(
       data.map(async (item: any) => {
         const userResponse = await fetch(`/api/users/getuser/${item.userId}`);
         const { data } = await userResponse.json();
@@ -31,10 +27,17 @@ export default function SeriesTableGet() {
         return { ...item, username };
       })
     );
-
+  
     setSeries(updatedSeries);
     setTotalPages(totalPages);
-  };
+  }, [currentPage, rowsPerPage, orderBy, orderDirection]);
+  
+  useEffect(() => {
+    fetchSeries();
+  }, [fetchSeries]);
+
+
+
 
   const handlePrevPage = () => {
     if (currentPage > 1) {

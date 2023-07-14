@@ -112,7 +112,7 @@ export default function SeriesFormEdit() {
             setSelectedImageCover(series.seriescover);
 
         }
-    }, [series]);
+    }, [series, setFieldValue, siteUrl]);
 
 
 
