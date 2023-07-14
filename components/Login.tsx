@@ -4,7 +4,20 @@ import React, { ReactNode } from 'react';
 import Inactive from "./Inactive";
 
 export default function Login() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return (
+      <>
+        <div className="bg-blue-900 h-screen w-screen flex items-center">
+          <div className="text-center w-full">
+            <h1 className="text-white text-3xl font-semibold">Loading...</h1>
+          </div>
+        </div>
+      </>
+    );
+  }
+  
   if (!session) {
     return (
       <>
