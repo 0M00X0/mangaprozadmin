@@ -11,23 +11,31 @@ export default function UsersTableGet(){
   
 
   
-    const fetchusers =useCallback(async () => {
+    const fetchusers = useCallback(async () => {
       const skip = (currentPage - 1) * rowsPerPage;
       const take = rowsPerPage;
-  
+    
       const response = await fetch(
         `/api/users/get?page=${currentPage}&limit=${rowsPerPage}&sortBy=${orderBy}&orderDirection=${orderDirection}`
       );
       const { data, totalPages } = await response.json();
-  
-      setusers(data);
+    
+      const userDetailsPromises = data.map(async (user: any) => {
+        const userDetailsResponse = await fetch(`/api/users/getaccount/${user.id}`);
+        const userDetails = await userDetailsResponse.json();
+        return { ...user, accountDetails: userDetails };
+      });
+    
+      const updatedUsers: any= await Promise.all(userDetailsPromises);
+    
+      setusers(updatedUsers);
       setTotalPages(totalPages);
     }, [currentPage, rowsPerPage, orderBy, orderDirection]);
-  
+
+    
     useEffect(() => {
       fetchusers();
     }, [fetchusers]);
-
 
     const handlePrevPage = () => {
       if (currentPage > 1) {
@@ -57,6 +65,19 @@ export default function UsersTableGet(){
         setOrderDirection("asc");
       }
       setCurrentPage(1);
+    };
+
+    const providerString = (provider: string) => {
+      switch (provider) {
+        case "google":
+          return "Google";
+        case "facebook":
+          return "Facebook";
+        case "discord":
+          return "Discord";
+        default:
+          return "Email";
+      }
     };
   
     return (
@@ -92,6 +113,13 @@ export default function UsersTableGet(){
                   <th
                     className="border-b dark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left cursor-pointer"
                     onClick={handleOrderByChange}
+                    data-order-by="email"
+                  >
+                    Provider
+                  </th>
+                  <th
+                    className="border-b dark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left cursor-pointer"
+                    onClick={handleOrderByChange}
                     data-order-by="createdAt"
                   >
                     Created
@@ -120,6 +148,9 @@ export default function UsersTableGet(){
                       </td>
                       <td className="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-400">
                         {item.email}
+                      </td>
+                      <td className="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-400">
+                        {providerString(item.accountDetails.data[0].provider)}
                       </td>
                       <td className="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-400">
                         {item.createdAt}
