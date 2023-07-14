@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  max
+  admin
+  editor
+  member
+  unknown
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  role          UserRole  @default(unknown)
+  Series        Series[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Config {
+  id    String @id @default(cuid())
+  name  String @unique
+  logo  String
+  title String
+  url   String
+  desc  String
+}
+
+model Series {
+  id                     Int      @id @default(autoincrement())
+  seriesname             String   @unique
+  seriesslug             String   @unique
+  seriesdescription      String
+  seriesalternativenames String
+  seriesauthor           String
+  seriesartist           String
+  seriesyear             String
+  seriesserialization    String
+  seriesscore            Int
+  seriestype             String
+  seriesstatus           String
+  seriesgenres           Json[]
+  seriesthumbnail        String
+  seriescover            String
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  User                   User     @relation(fields: [userId], references: [id])
+  userId                 String
+}
+
+// model Genre {
+//   id         String   @id @default(cuid())
+//   genre_ar   String   @unique
+//   genre_en   String   @unique
+//   desc_ar    String
+//   desc_en    String
+//   series     Series[] @relation("SeriesGenre")
+//   created_at DateTime @default(now())
+//   updated_at DateTime @updatedAt
+// }
