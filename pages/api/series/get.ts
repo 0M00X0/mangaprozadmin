@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 type Data = {
   success: boolean;
   data?: any;
+  totalPages?: number;
 };
 
 export default async function handler(
@@ -19,7 +20,7 @@ export default async function handler(
       skip,
       take,
       orderBy: {
-        [sortBy]: orderDirection,
+        [Array.isArray(sortBy) ? sortBy[0] : sortBy]: orderDirection,
       },
     });
 
